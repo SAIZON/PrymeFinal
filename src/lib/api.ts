@@ -2,16 +2,27 @@
 const API_BASE_URL = "/api/v1";
 
 export const PrymeAPI = {
-  // 1. Auth Module
-  login: async (email: string, password: string) => {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    if (!res.ok) throw new Error("Invalid credentials");
-    return res.json();
-  },
+    // 1. Auth Module
+    login: async (email: string, password: string) => {
+        const res = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+        });
+        if (!res.ok) throw new Error("Invalid credentials");
+        return res.json();
+    },
+
+    // ADD THIS FOR REGISTRATION
+    register: async (email: string, password: string, fullName: string) => {
+        const res = await fetch(`${API_BASE_URL}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password, fullName }), // Ensure these map to your Java RegisterRequest DTO
+        });
+        if (!res.ok) throw new Error("Registration failed");
+        return res.json();
+    },
 
   // 2. CRM Module (Admin Data Fetch)
   getApplications: async () => {

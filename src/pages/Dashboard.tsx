@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { FileText, Search, CheckCircle, CreditCard, Clock, AlertCircle, User, Building2, TrendingUp } from "lucide-react";
+import { FileText, Search, CheckCircle, CreditCard, Clock, AlertCircle, User, Building2, TrendingUp,LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -12,14 +12,15 @@ import { useAuth } from "@/contexts/AuthContext";
 const springConfig = { stiffness: 120, damping: 28, mass: 0.8 };
 
 const Dashboard = () => {
-  const { user, isLoading, isAdmin } = useAuth();
+  const {token, name, isLoading, isAdmin,signOut } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, isLoading, navigate]);
+    useEffect(() => {
+        // 2. Check if token is missing
+        if (!isLoading && !token) {
+            navigate("/auth");
+        }
+    }, [token, isLoading, navigate]);
 
   // Mock application data
   const application = {
@@ -133,9 +134,9 @@ const Dashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ type: "spring", ...springConfig }}
                 >
-                  <h1 className="text-xl md:text-2xl font-medium text-foreground mb-2" style={{ letterSpacing: "-0.02em" }}>
-                    Welcome back, {user?.email?.split("@")[0]}
-                  </h1>
+                    <h1 className="text-xl md:text-2xl font-medium text-foreground mb-2" style={{ letterSpacing: "-0.02em" }}>
+                        Welcome back, {name ?? "User"}
+                    </h1>
                   <p className="text-muted-foreground text-lg">
                     Monitor your loan applications and manage your profile
                   </p>
@@ -149,6 +150,14 @@ const Dashboard = () => {
                     Admin Panel
                   </Button>
                 )}
+                  <Button
+                      onClick={signOut}
+                      variant="outline"
+                      className="neo-button border-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                  >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                  </Button>
               </div>
             </div>
           </section>

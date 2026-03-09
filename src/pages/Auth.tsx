@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { PrymeAPI } from "@/lib/api"; // Added your new Java Backend API client
+import { useAuth } from "@/contexts/AuthContext";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -36,6 +37,7 @@ type ForgotPasswordData = z.infer<typeof forgotPasswordSchema>;
 type AuthView = "login" | "signup" | "forgot-password";
 
 const Auth = () => {
+    const { login } = useAuth();
   const [view, setView] = useState<AuthView>("login");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -63,50 +65,66 @@ const Auth = () => {
     }
   }, [navigate]);
 
-  const handleLogin = async (data: LoginData) => {
-    setIsLoading(true);
-    
-    try {
-      // Calling your Java Spring Boot Backend
-      const response = await PrymeAPI.login(data.email, data.password);
-      
-      // Store the secure token and role
-      localStorage.setItem("pryme_token", response.token);
-      localStorage.setItem("pryme_role", response.role);
-      localStorage.setItem("pryme_name", response.name);
+    const handleLogin = async (data: LoginData) => {
+        setIsLoading(true);
 
-      toast({
-        title: "Welcome back!",
-        description: response.message || "You have successfully logged in.",
-      });
-      
-      navigate("/admin-dashboard");
-    } catch (error: any) {
-      toast({
-        title: "Login Failed",
-        description: error.message || "Invalid email or password",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        try {
+            const response = await PrymeAPI.login(data.email, data.password);
 
-  const handleSignup = async (data: SignupData) => {
-    setIsLoading(true);
-    
-    // DEMO MOCK: Since we only built the Login API in Java tonight, 
-    // we simulate a successful signup so the UI doesn't break during the showcase.
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Account Created!",
-        description: "Welcome to PRYME Consulting. Please login with your new credentials.",
-      });
-      setView("login");
-      loginForm.setValue("email", data.email);
-    }, 1500);
-  };
+            const userName = response.user.fullName || response.user.name || response.user.email || "User";
+
+            // Call the context login function instead of manually setting localStorage
+            login(response.accessToken, response.user.role, userName);
+
+            toast({
+                title: "Welcome back!",
+                description: "You have successfully logged in.",
+            });
+
+            // 🧠 Check the role and route accordingly
+            const role = response.user.role;
+            if (role === "ROLE_ADMIN" || role === "SUPER_ADMIN" || role === "ADMIN") {
+                navigate("/admin");
+            } else {
+                navigate("/dashboard");
+            }
+
+        } catch (error: any) {
+            toast({
+                title: "Login Failed",
+                description: error.message || "Invalid email or password",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSignup = async (data: SignupData) => {
+        setIsLoading(true);
+
+        try {
+            // Call the Java Backend API for registration
+            await PrymeAPI.register(data.email, data.password, data.fullName);
+
+            toast({
+                title: "Account Created!",
+                description: "Welcome to PRYME Consulting. Please login with your new credentials.",
+            });
+
+            // Switch view to login and pre-fill the email
+            setView("login");
+            loginForm.setValue("email", data.email);
+        } catch (error: any) {
+            toast({
+                title: "Registration Failed",
+                description: error.message || "Could not create account. Please try again.",
+                variant: "destructive",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
   const handleForgotPassword = async (data: ForgotPasswordData) => {
     setIsLoading(true);

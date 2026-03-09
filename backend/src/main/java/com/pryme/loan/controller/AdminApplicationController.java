@@ -49,6 +49,22 @@ public class AdminApplicationController {
         return ResponseEntity.ok(applicationRepository.save(application));
     }
 
+//    @PatchMapping("/{id}/assign")
+//    public ResponseEntity<Application> assignLead(
+//            @PathVariable Long id,
+//            @RequestBody java.util.Map<String, String> payload
+//    ) {
+//        String assigneeId = payload.get("assigneeId");
+//
+//        Application application = applicationRepository.findById(id)
+//                .orElseThrow(() -> new ResourceNotFoundException("Application not found with id: " + id));
+//
+//        // Assuming your Application entity has a setAssignee method
+//        application.setAssignee(assigneeId);
+//
+//        return ResponseEntity.ok(applicationRepository.save(application));
+//    }
+
     private void createStatusNotification(Application app) {
         Notification notification = new Notification();
         notification.setUser(app.getUser()); // Assumes Application has a User relationship
