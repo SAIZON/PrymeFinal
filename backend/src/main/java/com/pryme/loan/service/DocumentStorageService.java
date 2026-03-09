@@ -1,0 +1,46 @@
+package com.pryme.loan.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
+
+@Service
+public class DocumentStorageService {
+
+    private final Path fileStorageLocation;
+
+    public DocumentStorageService() {
+        // Creates a folder named "uploads" in your project root directory
+        this.fileStorageLocation = Paths.get("uploads").toAbsolutePath().normalize();
+        try {
+            Files.createDirectories(this.fileStorageLocation);
+        } catch (Exception ex) {
+            throw new RuntimeException("Could not create the directory where the uploaded files will be stored.", ex);
+        }
+    }
+
+    public String storeFile(MultipartFile file) {
+        try {
+            // Generate a unique file name to prevent overwriting files with the same name
+            String originalFileName = file.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFileName != null && originalFileName.contains(".")) {
+                fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            }
+            String targetFileName = UUID.randomUUID().toString() + fileExtension;
+
+            // Copy file to the target location
+            Path targetLocation = this.fileStorageLocation.resolve(targetFileName);
+            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+
+            return targetLocation.toString();
+        } catch (IOException ex) {
+            throw new RuntimeException("Could not store file " + file.getOriginalFilename() + ". Please try again!", ex);
+        }
+    }
+}
