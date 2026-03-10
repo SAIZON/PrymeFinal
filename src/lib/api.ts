@@ -58,12 +58,25 @@ export const PrymeAPI = {
 
   // 3. Lead Generation (Public)
     submitApplication: async (loanType: string, requestedAmount: number, cibilScore: number) => {
-        // 🧠 FIX: Added "/public" to the URL path
-        const res = await fetch(`${API_BASE_URL}/public/apply`, {
+
+        // 🧠 1. Look for the user's token
+        const token = localStorage.getItem("pryme_token");
+
+        // 🧠 2. If no token exists, throw a custom error to halt the process
+        if (!token) {
+            throw new Error("AUTH_REQUIRED");
+        }
+
+        // 🧠 3. Call the secured endpoint and attach the token
+        const res = await fetch(`${API_BASE_URL}/apply`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
             body: JSON.stringify({ loanType, requestedAmount, cibilScore }),
         });
+
         if (!res.ok) throw new Error("Failed to submit application");
         return res.json();
     }

@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { Shield, Clock, CheckCircle, Building2, ArrowRight, Star, TrendingUp, AlertCircle, Info, LockKeyhole, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 // Core Layout & Utilities
 import Header from "@/components/layout/Header";
@@ -22,6 +23,7 @@ import BankerContact from "@/components/loan/BankerContact";
 const springConfig: any = { type: "spring", stiffness: 120, damping: 24, mass: 0.8 };
 
 const Apply = () => {
+    const navigate = useNavigate();
   const [loanAmount, setLoanAmount] = useState(500000);
   const [tenure, setTenure] = useState(5);
   const [showComparison, setShowComparison] = useState(false);
@@ -68,23 +70,44 @@ const Apply = () => {
     toast({ title: "Redirecting to Bank", description: `Opening ${bank?.bankName} application page...` });
   };
 
-  const handleApplyWithPyrme = async (bankId: string) => {
-    const bank = bankOffers.find(b => b.id === bankId);
-    if (!applicationData) return;
+    const handleApplyWithPyrme = async (bankId: string) => {
+        const bank = bankOffers.find(b => b.id === bankId);
+        if (!applicationData) return;
 
-    setIsSubmitting(true);
-    try {
-      const response = await PrymeAPI.submitApplication(applicationData.productType, loanAmount, applicationData.cibilScore);
-      toast({
-        title: "Application Submitted! 🎉",
-        description: `Your Lead ID: ${response.applicationId}. A PRYME RM for ${bank?.bankName} will contact you shortly.`,
-      });
-    } catch (error) {
-      toast({ title: "Submission Error", description: "Unable to reach the secure server.", variant: "destructive" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+        setIsSubmitting(true);
+        try {
+            const response = await PrymeAPI.submitApplication(
+                applicationData.productType,
+                loanAmount,
+                applicationData.cibilScore
+            );
+
+            toast({
+                title: "Application Submitted! 🎉",
+                description: `Your Lead ID: ${response.applicationId}. A PRYME RM for ${bank?.bankName} will contact you shortly.`,
+            });
+
+        } catch (error: any) {
+            // 🧠 Intercept the AUTH error we threw in api.ts
+            if (error.message === "AUTH_REQUIRED") {
+                toast({
+                    title: "Login Required",
+                    description: "You must be logged in to apply for a loan. Redirecting...",
+                    variant: "destructive"
+                });
+                navigate("/auth"); // Send them to the login page!
+            } else {
+                toast({
+                    title: "Submission Error",
+                    description: "Unable to reach the secure server.",
+                    variant: "destructive"
+                });
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
   const calculateEligibilityScore = () => {
     if (!applicationData) return 70;
