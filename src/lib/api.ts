@@ -57,13 +57,14 @@ export const PrymeAPI = {
   },
 
   // 3. Lead Generation (Public)
-  submitApplication: async (loanType: string, requestedAmount: number, cibilScore: number) => {
-    const res = await fetch(`${API_BASE_URL}/apply`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ loanType, requestedAmount, cibilScore }),
-    });
-    if (!res.ok) throw new Error("Failed to submit application");
-    return res.json();
-  }
+    submitApplication: async (loanType: string, requestedAmount: number, cibilScore: number) => {
+        // 🧠 FIX: Added "/public" to the URL path
+        const res = await fetch(`${API_BASE_URL}/public/apply`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ loanType, requestedAmount, cibilScore }),
+        });
+        if (!res.ok) throw new Error("Failed to submit application");
+        return res.json();
+    }
 };
