@@ -25,25 +25,38 @@ export const PrymeAPI = {
     },
 
   // 2. CRM Module (Admin Data Fetch)
-  getApplications: async () => {
-    const res = await fetch(`${API_BASE_URL}/admin/applications`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    if (!res.ok) throw new Error("Failed to fetch applications");
-    return res.json();
-  },
+    getApplications: async () => {
+        const token = localStorage.getItem("pryme_token");
+        if (!token) throw new Error("AUTH_REQUIRED");
 
-  // 🧠 NEW: CRM Status Update Route
-  updateStatus: async (applicationId: string, status: string) => {
-    const res = await fetch(`${API_BASE_URL}/admin/applications/${applicationId}/status`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
-    if (!res.ok) throw new Error("Failed to update status");
-    return res.json();
-  },
+        // Added ?size=100 to get a larger page of results
+        const res = await fetch(`${API_BASE_URL}/admin/applications?size=100`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        });
+        if (!res.ok) throw new Error("Failed to fetch applications");
+        return res.json();
+    },
+
+    // 🧠 NEW: CRM Status Update Route
+    updateStatus: async (id: number, status: string) => {
+        const token = localStorage.getItem("pryme_token");
+        if (!token) throw new Error("AUTH_REQUIRED");
+
+        // Changed to use query param (?status=...) to match Spring Boot @RequestParam
+        const res = await fetch(`${API_BASE_URL}/admin/applications/${id}/status?status=${status}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+        if (!res.ok) throw new Error("Failed to update status");
+        return res.json();
+    },
 
   // 🧠 NEW: CRM Lead Assignment Route
   assignLead: async (applicationId: string, assigneeId: string) => {
@@ -78,6 +91,22 @@ export const PrymeAPI = {
         });
 
         if (!res.ok) throw new Error("Failed to submit application");
+        return res.json();
+    },
+
+    getMyApplications: async () => {
+        const token = localStorage.getItem("pryme_token");
+        if (!token) throw new Error("AUTH_REQUIRED");
+
+        const res = await fetch(`${API_BASE_URL}/my-applications`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch applications");
         return res.json();
     }
 };

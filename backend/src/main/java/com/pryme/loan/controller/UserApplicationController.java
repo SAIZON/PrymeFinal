@@ -11,10 +11,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1") // 🧠 Notice: This is NOT /public, so it requires a JWT token!
+@RequestMapping("/api/v1") // Notice: This is NOT /public, so it requires a JWT token!
 @RequiredArgsConstructor
 public class UserApplicationController {
 
@@ -42,7 +43,7 @@ public class UserApplicationController {
             application.setAmount(BigDecimal.valueOf(((Number) amountObj).doubleValue()));
         }
 
-        application.setStatus(ApplicationStatus.SUBMITTED);
+        application.setStatus(ApplicationStatus.SUBMITTED); // Set to SUBMITTED to avoid DB constraint issues
 
         Application savedApplication = applicationRepository.save(application);
 
@@ -50,5 +51,18 @@ public class UserApplicationController {
                 "message", "Application submitted successfully",
                 "applicationId", "PYR-" + savedApplication.getId()
         ));
+    }
+
+    // --- NEW ENDPOINT TO FETCH USER'S APPLICATIONS ---
+    @GetMapping("/my-applications")
+    public ResponseEntity<List<Application>> getMyApplications(Authentication authentication) {
+        String email = authentication.getName();
+        User loggedInUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Fetch applications belonging only to this specific user
+        List<Application> applications = applicationRepository.findByUserId(loggedInUser.getId());
+
+        return ResponseEntity.ok(applications);
     }
 }
