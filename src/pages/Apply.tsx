@@ -87,6 +87,11 @@ const Apply = () => {
                 description: `Your Lead ID: ${response.applicationId}. A PRYME RM for ${bank?.bankName} will contact you shortly.`,
             });
 
+            // Add a slight delay so the user can see the success toast before redirecting
+            setTimeout(() => {
+                navigate("/dashboard"); // Or whatever your tracking page route is (e.g., "/track")
+            }, 1500);
+
         } catch (error: any) {
             // 🧠 Intercept the AUTH error we threw in api.ts
             if (error.message === "AUTH_REQUIRED") {

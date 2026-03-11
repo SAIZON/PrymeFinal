@@ -42,7 +42,7 @@ public class UserApplicationController {
             application.setAmount(BigDecimal.valueOf(((Number) amountObj).doubleValue()));
         }
 
-        application.setStatus(ApplicationStatus.PENDING);
+        application.setStatus(ApplicationStatus.SUBMITTED);
 
         Application savedApplication = applicationRepository.save(application);
 
