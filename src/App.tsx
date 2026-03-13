@@ -19,6 +19,7 @@ import Dashboard from "./pages/Dashboard";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import Rewards from "./pages/Rewards";
 
 const queryClient = new QueryClient();
 
@@ -102,6 +103,7 @@ const App = () => {
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/apply" element={<Apply />} />
+                        <Route path="/rewards" element={<Rewards />} />
                       <Route path="/auth" element={<Auth />} />
                       <Route path="/dashboard" element={<Dashboard />} />
                       <Route 

@@ -51,6 +51,8 @@ const navLinks = [
   { href: "/", label: "Home" },
   { href: "/apply", label: "Compare Loans" },
   { href: "/dashboard", label: "Track Application" },
+    { href: "/rewards", label: "Offers" },
+
 ];
 
 // --- Mobile Menu Component ---
